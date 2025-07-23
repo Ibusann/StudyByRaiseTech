@@ -13,7 +13,6 @@ public class StudentManagementApplication {
 
 	@Autowired
 	private StudentRepository studentRepository;
-	private CourseRepository courseRepository;
 	public static void main(String[] args) {
 		SpringApplication.run(StudentManagementApplication.class, args);
 	}
