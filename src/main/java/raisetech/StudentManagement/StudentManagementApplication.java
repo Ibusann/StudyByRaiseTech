@@ -1,30 +1,19 @@
 package raisetech.StudentManagement;
 
 import java.util.List;
+import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.stereotype.Service;
+import raisetech.StudentManagement.data.Course;
+import raisetech.StudentManagement.data.Student;
+import raisetech.StudentManagement.repository.StudentRepository;
 
 @SpringBootApplication
-@RestController
 public class StudentManagementApplication {
 
-	@Autowired
-	private StudentRepository studentRepository;
-	public static void main(String[] args) {
-		SpringApplication.run(StudentManagementApplication.class, args);
-	}
-
-	@GetMapping("/student")
-	public List<Student> getStudentList() {
-		return studentRepository.searchStudent();
-
-	}
-	@GetMapping("/course")
-	public List<Course> getCourseList() {
-		return studentRepository.searchCourse();
-	}
+  public static void main(String[] args) {
+    SpringApplication.run(StudentManagementApplication.class, args);
+  }
 }
-
