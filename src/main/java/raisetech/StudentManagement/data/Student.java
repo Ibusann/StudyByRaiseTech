@@ -9,12 +9,14 @@ import lombok.Setter;
 public class Student {
   private String studentId;
   private String name;
-  private String furigana;
+  private String hurigana;
   private String nickname;
   private String mail;
   private String city;
   private int age;
   private String gender;
+  private String remark;
+  private boolean isDeleted;
 }
 
 
