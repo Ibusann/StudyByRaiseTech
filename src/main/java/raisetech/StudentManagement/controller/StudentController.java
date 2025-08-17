@@ -1,18 +1,20 @@
 package raisetech.StudentManagement.controller;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
 import raisetech.StudentManagement.controller.converter.StudentConverter;
 import raisetech.StudentManagement.data.Course;
 import raisetech.StudentManagement.data.Student;
 import raisetech.StudentManagement.domain.StudentDetail;
 import raisetech.StudentManagement.service.StudentService;
 
-@RestController
+@Controller
 public class StudentController {
 
   private StudentService service;
@@ -25,14 +27,33 @@ public class StudentController {
   }
 
   @GetMapping("/student")
-  public List<StudentDetail> getStudentList() {
+  public String getStudentList(Model model) {
     List<Student> students = service.searchStudentList();
     List<Course> courses = service.searchCourseList();
-    return converter.convertStudentDetails(students, courses);
+
+    model.addAttribute("student", converter.convertStudentDetails(students, courses));
+    return "student";
   }
 
   @GetMapping("/course")
   public List<Course> getCourseList() {
     return service.searchCourseList();
+  }
+
+  @GetMapping("/newStudent")
+  public String newStudent(Model model) {
+    model.addAttribute("studentDetail", new StudentDetail());
+    return "registerStudent";
+  }
+
+  @PostMapping("/registerStudent")
+  public String registerStudent(@ModelAttribute StudentDetail studentDetail, BindingResult result) {
+    if (result.hasErrors()) {
+      return "registerStudent";
+    }
+    //新規受講生情報を登録する処理を実装する。
+    service.registerStudent(studentDetail);
+    //コース情報も一緒に登録できるように実装する。コースは単体で良い。
+    return "redirect:/student";
   }
 }
