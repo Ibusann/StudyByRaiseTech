@@ -10,7 +10,7 @@ public class Student {
 
   private int studentId;
   private String name;
-  private String hurigana;
+  private String kanaName;
   private String nickname;
   private String mail;
   private String city;

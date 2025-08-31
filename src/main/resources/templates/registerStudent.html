@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
   <title>受講生登録</title>
 </head>
@@ -11,8 +11,8 @@
     <input type="text" id="name" th:field="*{student.name}" required/>
   </div>
   <div>
-    <label for="hurigana">カナ名:</label>
-    <input type="text" id="hurigana" th:field="*{student.hurigana}" required/>
+    <label for="kanaName">カナ名:</label>
+    <input type="text" id="kanaName" th:field="*{student.kanaName}" required/>
   </div>
   <div>
     <label for="nickname">ニックネーム:</label>
@@ -37,6 +37,11 @@
   <div>
     <label for="remark">備考:</label>
     <input type="text" id="remark" th:field="*{student.remark}" required/>
+  </div>
+  <div th:each="course, stat : *{studentsCourses}">
+    <label for="course"> 受講コース名: </label>
+    <input type="text" id="course" th:id="studentsCourses.__${stat.index}__.course"
+           th:field="*{studentsCourses[__${stat.index}__].course}"/>
   </div>
   <div>
     <button type="submit">登録</button>
