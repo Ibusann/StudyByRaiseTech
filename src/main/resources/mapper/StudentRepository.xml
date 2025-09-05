@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="raisetech.StudentManagement.repository.StudentRepository">
+
+  <select id="searchStudent" resultType="raisetech.StudentManagement.data.Student">
+    SELECT * FROM students
+  </select>
+  <select id="searchStudentsCourse" resultType="raisetech.StudentManagement.data.StudentsCourses">
+    SELECT * FROM students_courses
+  </select>
+
+  <select id="findById" parameterType="int" resultType="raisetech.StudentManagement.data.Student">
+    SELECT * FROM students WHERE student_id = #{id}
+  </select>
+  <select id="findCoursesById" parameterType="int"
+    resultType="raisetech.StudentManagement.data.StudentsCourses">
+    SELECT * FROM students_courses WHERE student_id = #{id}
+  </select>
+
+  <insert id="registerStudent" parameterType="raisetech.StudentManagement.data.Student"
+    useGeneratedKeys="true" keyProperty="studentId">
+    INSERT INTO students(name, kana_name, nickname, mail, city, age, gender, remark, is_deleted)
+    VALUES(#{name}, #{kanaName}, #{nickname}, #{mail}, #{city}, #{age}, #{gender}, #{remark},
+    #{isDeleted})
+  </insert>
+
+  <update id="updateStudent" parameterType="raisetech.StudentManagement.data.Student">
+    UPDATE students SET
+    name = #{name},
+    kana_name = #{kanaName},
+    nickname = #{nickname},
+    mail = #{mail},
+    city = #{city},
+    age = #{age},
+    gender = #{gender},
+    remark = #{remark},
+    is_deleted = #{isDeleted}
+    WHERE student_id = #{studentId}
+  </update>
+  <update id="updateStudentsCourses"
+    parameterType="raisetech.StudentManagement.data.StudentsCourses">
+    UPDATE students_courses SET
+    course = #{course},
+    start_course = #{startCourse},
+    end_course = #{endCourse}
+    WHERE course_id = #{courseId}
+  </update>
+</mapper>
