@@ -1,9 +1,13 @@
 package raisetech.StudentManagement.controller;
 
+import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -65,7 +69,7 @@ public class StudentController {
    */
   @PostMapping("/registerStudent")
   public StudentDetail registerStudent(
-      @RequestBody StudentDetail studentDetail) { // ★ 戻り値をStudentDetailに変更
+      @Valid @RequestBody StudentDetail studentDetail) { // ★ 戻り値をStudentDetailに変更
     StudentDetail registeredStudent = service.registerStudent(studentDetail);
     return registeredStudent; // ★ 登録した内容を返す
   }
@@ -78,12 +82,32 @@ public class StudentController {
    */
 
   @PutMapping("student/update")
-  public ResponseEntity<String> updateStudent(@RequestBody StudentDetail studentDetail) {
+  public ResponseEntity<String> updateStudent(@Valid @RequestBody StudentDetail studentDetail) {
     service.updateStudent(studentDetail);
     return ResponseEntity.ok("更新処理が成功しました。");
   }
 
+  /**
+   * 文字の入力チェックを行うエラーハンドリング
+   *
+   * @param ex
+   * @return
+   */
+
+  // バリデーションエラーをハンドリングするメソッド
+  @ExceptionHandler(MethodArgumentNotValidException.class)
+  public ResponseEntity<String> handleValidationExceptions(MethodArgumentNotValidException ex) {
+    StringBuilder errors = new StringBuilder();
+    ex.getBindingResult().getAllErrors().forEach(error -> {
+      String errorMessage = error.getDefaultMessage();
+      errors.append(errorMessage).append("\n");
+    });
+    return new ResponseEntity<>(errors.toString(), HttpStatus.BAD_REQUEST);
+  }
 }
+
+
+
 /*　model
 @GetMapping("/newStudent")
 public String newStudent(Model model) {

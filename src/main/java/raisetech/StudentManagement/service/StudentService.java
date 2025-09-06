@@ -98,18 +98,3 @@ public class StudentService {
     return repository.findCoursesById(id);
   }
 }
-
-//絞り込みをする。年齢が30代以上の人
-//抽出したリストをコントローラーに返す
-/*
-      return repository.searchStudent().stream()
-        .filter(s -> s.getAge() >= 30)
-        .collect(Collectors.toList());
- */
-//絞り込み検索で、Javaコースのみのコース情報を抽出する
-//抽出したリストをコントローラーに返す
-/*
-      return repository.searchCourse().stream()
-          .filter(c -> "Java".equals(c.getCourse()))
-          .collect(Collectors.toList());
-*/
