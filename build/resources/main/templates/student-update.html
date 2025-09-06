@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="ja" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>受講生情報更新</title>
+</head>
+<body>
+<h1>受講生情報更新</h1>
+
+<form th:action="@{/student/update}" th:object="${studentDetail}" method="post">
+  <input type="hidden" th:field="*{student.studentId}"/>
+
+  <label>名前: <input type="text" th:field="*{student.name}"/></label><br/>
+  <label>カナ名: <input type="text" th:field="*{student.kanaName}"/></label><br/>
+  <label>ニックネーム: <input type="text" th:field="*{student.nickname}"/></label><br/>
+  <label>メール: <input type="text" th:field="*{student.mail}"/></label><br/>
+  <label>市区町村: <input type="text" th:field="*{student.city}"/></label><br/>
+  <label>年齢: <input type="number" th:field="*{student.age}"/></label><br/>
+  <label>性別: <input type="text" th:field="*{student.gender}"/></label><br/>
+  <label>備考: <input type="text" th:field="*{student.remark}"/></label><br/>
+  <label>キャンセル: <input type="checkbox" th:field="*{student.deleted}"/></label><br/>
+  <br>
+
+  <div th:each="course, stat : *{studentsCourses}">
+    <input type="hidden" th:field="*{studentsCourses[__${stat.index}__].courseId}"/>
+    <label>受講コース名: <input type="text"
+                                th:field="*{studentsCourses[__${stat.index}__].course}"/></label><br/>
+  </div>
+
+  <button type="submit">更新</button>
+</form>
+</body>
+</html>

@@ -1,0 +1,8 @@
+<insert id="registerStudent" parameterType="raisetech.StudentManagement.data.Student"
+  useGeneratedKeys="true" keyProperty="studentId" keyColumn="student_id">
+  INSERT INTO students (
+  name, kana_name, nickname, mail, city, age, gender, remark
+  ) VALUES (
+  #{name}, #{kanaName}, #{nickname}, #{mail}, #{city}, #{age}, #{gender}, #{remark}
+  );
+</insert>
