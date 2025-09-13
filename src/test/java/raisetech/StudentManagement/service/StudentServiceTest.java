@@ -6,7 +6,6 @@ import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -26,15 +25,9 @@ class StudentServiceTest {
   @Mock
   private StudentConverter converter;
 
-  private StudentService sut;
-
-  @BeforeEach
-  void before() {
-    sut = new StudentService(repository, converter);
-  }
-
   @Test
   void searchStudent_リポジトリとコンバーターの処理が適切に呼び出せていること() {
+    StudentService sut = new StudentService(repository, converter);
     List<Student> studentList = new ArrayList<>();
     List<StudentsCourses> studentCourseList = new ArrayList<>();
     when(repository.searchStudent()).thenReturn(studentList);
