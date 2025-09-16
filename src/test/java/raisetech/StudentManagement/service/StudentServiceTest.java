@@ -27,6 +27,7 @@ class StudentServiceTest {
 
   @Test
   void searchStudent_リポジトリとコンバーターの処理が適切に呼び出せていること() {
+    StudentService sut = new StudentService(repository, converter); // 👈 この行を追加
     List<Student> studentList = new ArrayList<>();
     List<StudentsCourses> studentCourseList = new ArrayList<>();
     when(repository.searchStudent()).thenReturn(studentList);

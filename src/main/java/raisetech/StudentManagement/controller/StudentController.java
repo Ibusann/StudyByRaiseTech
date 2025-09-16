@@ -107,18 +107,3 @@ public class StudentController {
 }
 
 
-
-/*　model
-@GetMapping("/newStudent")
-public String newStudent(Model model) {
-  StudentDetail studentDetail = new StudentDetail();
-  // ★ ここでstudentオブジェクトを初期化する
-  studentDetail.setStudent(new Student());
-  studentDetail.setStudentsCourses(Arrays.asList(new StudentsCourses()));
-  // studentsCoursesリストを初期化し、1つ以上の空のオブジェクトを追加
-  // モデルにオブジェクトを追加
-  model.addAttribute("studentDetail", studentDetail);
-  return "registerStudent";
-}
-
- */
