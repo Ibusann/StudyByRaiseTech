@@ -14,6 +14,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -23,6 +25,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultMatcher;
 import raisetech.StudentManagement.data.Student;
 import raisetech.StudentManagement.domain.StudentDetail;
+import raisetech.StudentManagement.domain.StudentsDetailStatus;
 import raisetech.StudentManagement.service.StudentService;
 
 @WebMvcTest(StudentController.class)
@@ -143,4 +146,30 @@ class StudentControllerTest {
             .content(invalidJson))
         .andExpect(status().isBadRequest());
   }
+
+  @Test
+  @DisplayName("コースとステータスの取得APIが正しいJSONを返すこと")
+  void getCoursesWithStatus_returnsCorrectJson() throws Exception {
+    // サービスが空のリストを返すようにモックの振る舞いを設定
+    List<StudentsDetailStatus> expectedList = Collections.emptyList();
+    when(service.getCoursesWithStatus()).thenReturn(expectedList);
+
+    mockMvc.perform(get("/students/status/list"))
+        .andExpect(status().isOk())
+        .andExpect(content().json(objectMapper.writeValueAsString(expectedList)));
+  }
+
+  @Test
+  @DisplayName("申込状況で受講生を検索すると、正しいJSONが返されること")
+  void getStudentsByStatus_returnsCorrectJson() throws Exception {
+    // モックの振る舞いを設定: サービスが空のリストを返すようにする
+    when(service.findStudentDetailsByApplicationStatus("本申込")).thenReturn(
+        Collections.emptyList());
+
+    mockMvc.perform(get("/students/status")
+            .param("applicationStatus", "本申込"))
+        .andExpect(status().isOk())
+        .andExpect(content().json("[]"));
+  }
 }
+

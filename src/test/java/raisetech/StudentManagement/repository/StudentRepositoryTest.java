@@ -11,6 +11,8 @@ import org.mybatis.spring.boot.test.autoconfigure.MybatisTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import raisetech.StudentManagement.data.Student;
 import raisetech.StudentManagement.data.StudentsCourses;
+import raisetech.StudentManagement.domain.StudentDetail;
+import raisetech.StudentManagement.domain.StudentsDetailStatus;
 
 @MybatisTest
 class StudentRepositoryTest {
@@ -74,5 +76,40 @@ class StudentRepositoryTest {
     assertEquals(1, courses.size());
     assertEquals("Javaコース", courses.get(0).getCourse());
   }
+
+  @Test
+  @DisplayName("コースと申込状況が正しく取得できること")
+  void findCoursesWithStatus_returnsCorrectly() {
+    // DBに存在するデータに合わせて、5件のデータが取得されることを期待
+    List<StudentsDetailStatus> result = sut.findCoursesWithStatus();
+
+    assertNotNull(result);
+    assertEquals(5, result.size());
+
+    // 取得したデータの最初の要素を検証
+    StudentsDetailStatus firstResult = result.get(0);
+    assertEquals(2, firstResult.getStudentsCourses().getCourseId());
+    assertEquals("Javaコース", firstResult.getStudentsCourses().getCourse());
+    assertEquals("本申込", firstResult.getStudentsCoursesStatus().getApplicationStatus());
+
+    // 取得したデータの最後の要素を検証
+    StudentsDetailStatus lastResult = result.get(4);
+    assertEquals(6, lastResult.getStudentsCourses().getCourseId());
+    assertEquals("デザイン思考", lastResult.getStudentsCourses().getCourse());
+    assertEquals("本申込", lastResult.getStudentsCoursesStatus().getApplicationStatus());
+  }
+
+  @Test
+  @DisplayName("申込状況が「受講中」の受講生を検索できること")
+  void findStudentDetailsByApplicationStatus_returnsCorrectly() {
+
+    List<StudentDetail> result = sut.findStudentDetailsByApplicationStatus("受講中");
+
+    assertNotNull(result);
+    assertEquals(1, result.size());
+    assertEquals("田中 健太", result.get(0).getStudent().getName());
+    assertEquals("フロントエンド開発", result.get(0).getStudentsCourses().get(0).getCourse());
+  }
 }
+
 

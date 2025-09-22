@@ -13,10 +13,12 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import raisetech.StudentManagement.data.Student;
 import raisetech.StudentManagement.data.StudentsCourses;
 import raisetech.StudentManagement.domain.StudentDetail;
+import raisetech.StudentManagement.domain.StudentsDetailStatus;
 import raisetech.StudentManagement.service.StudentService;
 
 /**
@@ -85,6 +87,29 @@ public class StudentController {
   public ResponseEntity<String> updateStudent(@Valid @RequestBody StudentDetail studentDetail) {
     service.updateStudent(studentDetail);
     return ResponseEntity.ok("更新処理が成功しました。");
+  }
+
+  /**
+   * 受講生の申込状況の一覧を取得するAPIです。
+   *
+   * @param StatusList 検索したい申込状況（例: "受講中"）
+   * @return 申込状況を確認する受講生詳細情報のリスト
+   */
+
+  @GetMapping("/students/status/list")
+  public List<StudentsDetailStatus> getCoursesWithStatus() {
+    return service.getCoursesWithStatus();
+  }
+
+  /**
+   * 申込状況に基づいて受講生を検索するAPIです。
+   *
+   * @param applicationStatus 検索したい申込状況（例: "受講中"）
+   * @return 申込状況に一致する受講生詳細情報のリスト
+   */
+  @GetMapping("/students/status")
+  public List<StudentDetail> getStudentsByStatus(@RequestParam String applicationStatus) {
+    return service.findStudentDetailsByApplicationStatus(applicationStatus);
   }
 
   /**

@@ -5,6 +5,7 @@ VALUES
 (4, '田中 健太', 'タナカ ケンタ', 'けんけん', 'tanaka.k@example.com', '福岡県', 30, '男性', '未経験からエンジニアへ'),
 (5, '佐藤 ゆう', 'サトウ ユウ', 'ゆう', 'sato.y@example.com', '愛知県', 19, '非公開', '高校卒業後に入学'),
 (6, '吉田 葵', 'ヨシダ アオイ', 'あお', 'yoshida.a@example.com', '北海道', 28, '女性', 'UI/UXデザインも学ぶ');
+
 INSERT INTO students_courses (course_id, student_id, course, start_course, end_course)
 VALUES
 (2, 2, 'Javaコース', '2025-04-01 09:00:00', '2026-03-31 17:00:00'),
@@ -12,3 +13,11 @@ VALUES
 (4, 4, 'フロントエンド開発', '2025-04-10 09:00:00', '2026-03-31 17:00:00'),
 (5, 5, 'Python AIコース', '2025-06-01 09:00:00', '2026-05-31 17:00:00'),
 (6, 6, 'デザイン思考', '2025-07-20 09:00:00', '2025-10-20 17:00:00');
+
+INSERT INTO students_courses_status (student_id, course_id, application_status)
+VALUES
+(2, 2, '本申込'),
+(3, 3, '仮申込'),
+(4, 4, '受講中'),
+(5, 5, '受講終了'),
+(6, 6, '本申込');
