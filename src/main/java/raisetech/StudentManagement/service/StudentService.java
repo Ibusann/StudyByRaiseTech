@@ -9,6 +9,7 @@ import raisetech.StudentManagement.controller.converter.StudentConverter;
 import raisetech.StudentManagement.data.Student;
 import raisetech.StudentManagement.data.StudentsCourses;
 import raisetech.StudentManagement.domain.StudentDetail;
+import raisetech.StudentManagement.domain.StudentsDetailStatus;
 import raisetech.StudentManagement.repository.StudentRepository;
 
 @Service
@@ -97,4 +98,26 @@ public class StudentService {
   public List<StudentsCourses> findCoursesById(int id) {
     return repository.findCoursesById(id);
   }
+
+  /**
+   * 受講生の申込状況の一覧を取得する。
+   *
+   * @return 申込状況を確認する受講生詳細情報のリスト
+   */
+  public List<StudentsDetailStatus> getCoursesWithStatus() {
+    return repository.findCoursesWithStatus();
+  }
+
+  /**
+   * 申込状況に基づいて受講生詳細情報を検索します。
+   *
+   * @param applicationStatus 検索したい申込状況
+   * @return 申込状況に一致する受講生詳細情報のリスト
+   */
+  public List<StudentDetail> findStudentDetailsByApplicationStatus(String applicationStatus) {
+    // リポジトリから直接、申込状況に紐づく受講生詳細情報を取得
+    return repository.findStudentDetailsByApplicationStatus(applicationStatus);
+  }
+
+
 }

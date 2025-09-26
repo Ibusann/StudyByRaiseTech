@@ -54,4 +54,67 @@
     end_course = #{endCourse}
     WHERE course_id = #{courseId}
   </update>
+
+  <select id="findStudentDetailsByApplicationStatus" resultMap="studentDetailMap">
+    SELECT
+    s.student_id,
+    s.name,
+    sc.course_id,
+    sc.course
+    FROM
+    students s
+    JOIN students_courses sc ON s.student_id = sc.student_id
+    JOIN students_courses_status scs ON sc.student_id = scs.student_id AND sc.course_id =
+    scs.course_id
+    WHERE
+    scs.application_status = #{applicationStatus}
+  </select>
+
+  <resultMap id="courseWithStatusMap"
+    type="raisetech.StudentManagement.domain.StudentsDetailStatus">
+    <association property="studentsCourses"
+      javaType="raisetech.StudentManagement.data.StudentsCourses">
+      <id property="courseId" column="course_id"/>
+      <result property="studentId" column="student_id"/>
+      <result property="course" column="course"/>
+      <result property="startCourse" column="start_course"/>
+      <result property="endCourse" column="end_course"/>
+    </association>
+    <association property="studentsCoursesStatus"
+      javaType="raisetech.StudentManagement.data.StudentsCoursesStatus">
+      <id property="statusId" column="status_id"/>
+      <result property="courseId" column="course_id"/>
+      <result property="studentId" column="student_id"/>
+      <result property="applicationStatus" column="application_status"/>
+    </association>
+  </resultMap>
+
+  <select id="findCoursesWithStatus" resultMap="courseWithStatusMap">
+    SELECT
+    sc.course_id,
+    sc.student_id,
+    sc.course,
+    sc.start_course,
+    sc.end_course,
+    scs.status_id,
+    scs.application_status
+    FROM
+    students_courses sc
+    JOIN
+    students_courses_status scs ON sc.course_id = scs.course_id
+  </select>
+
+  <resultMap id="studentDetailMap" type="raisetech.StudentManagement.domain.StudentDetail">
+    <association property="student" javaType="raisetech.StudentManagement.data.Student">
+      <id property="studentId" column="student_id"/>
+      <result property="name" column="name"/>
+    </association>
+    <collection property="studentsCourses"
+      ofType="raisetech.StudentManagement.data.StudentsCourses">
+      <id property="courseId" column="course_id"/>
+      <result property="course" column="course"/>
+    </collection>
+  </resultMap>
+
+
 </mapper>
