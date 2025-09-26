@@ -49,11 +49,11 @@ class StudentRepositoryTest {
   @DisplayName("既存の受講生情報が正しく更新できること")
   void updateExistingStudentSuccessfully() {
     Student updatedStudent = new Student();
-    updatedStudent.setStudentId(2);
+    updatedStudent.setStudentId(1);
     updatedStudent.setName("更新された ユーザー");
     updatedStudent.setAge(25);
     sut.updateStudent(updatedStudent);
-    Student foundStudent = sut.findById(999);
+    Student foundStudent = sut.findById(1);
     assertEquals("更新された ユーザー", foundStudent.getName());
     assertEquals(25, foundStudent.getAge());
   }
@@ -61,9 +61,9 @@ class StudentRepositoryTest {
   @Test
   @DisplayName("IDで受講生情報が取得できること")
   void findStudentByIdSuccessfully() {
-    Student foundStudent = sut.findById(2);
+    Student foundStudent = sut.findById(1);
     assertNotNull(foundStudent);
-    assertEquals(2, foundStudent.getStudentId());
+    assertEquals(1, foundStudent.getStudentId());
     assertEquals("山田 太郎", foundStudent.getName());
   }
 
@@ -71,7 +71,7 @@ class StudentRepositoryTest {
   @DisplayName("IDで受講生のコース情報が取得できること")
   void findCoursesByIdSuccessfully() {
     // students_coursesテーブルのstudent_idがvarchar(100)なので、ここではIDを文字列として扱います
-    List<StudentsCourses> courses = sut.findCoursesById(2);
+    List<StudentsCourses> courses = sut.findCoursesById(1);
     assertNotNull(courses);
     assertEquals(1, courses.size());
     assertEquals("Javaコース", courses.get(0).getCourse());
@@ -88,13 +88,13 @@ class StudentRepositoryTest {
 
     // 取得したデータの最初の要素を検証
     StudentsDetailStatus firstResult = result.get(0);
-    assertEquals(2, firstResult.getStudentsCourses().getCourseId());
+    assertEquals(1, firstResult.getStudentsCourses().getCourseId());
     assertEquals("Javaコース", firstResult.getStudentsCourses().getCourse());
     assertEquals("本申込", firstResult.getStudentsCoursesStatus().getApplicationStatus());
 
     // 取得したデータの最後の要素を検証
     StudentsDetailStatus lastResult = result.get(4);
-    assertEquals(6, lastResult.getStudentsCourses().getCourseId());
+    assertEquals(5, lastResult.getStudentsCourses().getCourseId());
     assertEquals("デザイン思考", lastResult.getStudentsCourses().getCourse());
     assertEquals("本申込", lastResult.getStudentsCoursesStatus().getApplicationStatus());
   }
