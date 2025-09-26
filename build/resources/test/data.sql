@@ -1,11 +1,3 @@
-SET REFERENTIAL_INTEGRITY FALSE;
-
-TRUNCATE TABLE students_courses;
-TRUNCATE TABLE students;
-TRUNCATE TABLE students_courses_status;
-
-SET REFERENTIAL_INTEGRITY TRUE;
-
 INSERT INTO students (name, kana_name, nickname, mail, city, age, gender, remark)
 VALUES
 ('山田 太郎', 'ヤマダ タロウ', 'やま', 'yamada.t@example.com', '東京都', 25, '男性', 'Javaコース受講'),
@@ -16,11 +8,11 @@ VALUES
 
 INSERT INTO students_courses (student_id, course, start_course, end_course)
 VALUES
-(1, 'Javaコース', '2025-04-01 09:00:00', '2026-03-31 17:00:00'),
-(2, 'データベース基礎', '2025-05-15 09:00:00', '2025-08-15 17:00:00'),
-(3, 'フロントエンド開発', '2025-04-10 09:00:00', '2026-03-31 17:00:00'),
-(4, 'Python AIコース', '2025-06-01 09:00:00', '2026-05-31 17:00:00'),
-(5, 'デザイン思考', '2025-07-20 09:00:00', '2025-10-20 17:00:00');
+(1,'Javaコース', '2025-04-01 09:00:00', '2026-03-31 17:00:00'),
+(2,'データベース基礎', '2025-05-15 09:00:00', '2025-08-15 17:00:00'),
+(3,'フロントエンド開発', '2025-04-10 09:00:00', '2026-03-31 17:00:00'),
+(4,'Python AIコース', '2025-06-01 09:00:00', '2026-05-31 17:00:00'),
+(5,'デザイン思考', '2025-07-20 09:00:00', '2025-10-20 17:00:00');
 
 INSERT INTO students_courses_status (student_id, course_id, application_status)
 VALUES
