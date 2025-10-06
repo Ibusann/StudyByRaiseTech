@@ -1,6 +1,9 @@
 package raisetech.StudentManagement.controller;
 
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -13,9 +16,11 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import raisetech.StudentManagement.data.Student;
 import raisetech.StudentManagement.data.StudentsCourses;
+import raisetech.StudentManagement.domain.StudentCourseStatusDetail;
 import raisetech.StudentManagement.domain.StudentDetail;
 import raisetech.StudentManagement.service.StudentService;
 
@@ -23,8 +28,8 @@ import raisetech.StudentManagement.service.StudentService;
  * 受講生の検索や登録、更新などを行うREST APIとして実行されるControllerである。
  */
 
-@RestController
 @Validated
+@RestController
 
 public class StudentController {
 
@@ -88,13 +93,37 @@ public class StudentController {
   }
 
   /**
-   * 文字の入力チェックを行うエラーハンドリング
+   * 受講生の申込状況の一覧を取得するAPIです。
    *
-   * @param ex
-   * @return
+   * @return 申込状況を確認する受講生詳細情報のリスト
    */
+  // 修正: 戻り値を ResponseEntity<List<StudentsDetailStatus>> に変更
+  @GetMapping("/students/status/list")
+  public ResponseEntity<List<StudentCourseStatusDetail>> getCoursesWithStatus() {
+    // Listを直接返す代わりにResponseEntity.ok()で包む
+    return ResponseEntity.ok(service.getCoursesWithStatus());
+  }
 
-  // バリデーションエラーをハンドリングするメソッド
+  /**
+   * 申込状況に基づいて受講生を検索するAPIです。
+   *
+   * @param applicationStatus 検索したい申込状況（例: "受講中"）
+   * @return 申込状況に一致する受講生詳細情報のリスト
+   */
+  @GetMapping("/students/status")
+  public ResponseEntity<List<StudentDetail>> getStudentsByStatus(
+      // 修正: @NotBlankを追加し、空文字または空白のみの入力を禁止する
+      @RequestParam @NotBlank(message = "申込状況は空にできません。") String applicationStatus) {
+
+    // この時点で applicationStatus が null, 空文字, 空白のみの場合は、
+    // Controllerの@Validatedと@NotBlankにより400エラーが自動的に発生します。
+
+    return ResponseEntity.ok(service.findStudentDetailsByApplicationStatus(applicationStatus));
+  }
+
+  /**
+   * RequestBody（@Valid）の入力チェックを行うエラーハンドリング
+   */
   @ExceptionHandler(MethodArgumentNotValidException.class)
   public ResponseEntity<String> handleValidationExceptions(MethodArgumentNotValidException ex) {
     StringBuilder errors = new StringBuilder();
@@ -104,21 +133,24 @@ public class StudentController {
     });
     return new ResponseEntity<>(errors.toString(), HttpStatus.BAD_REQUEST);
   }
+
+  /**
+   * RequestParam/PathVariable（@Validated）の入力チェックを行うエラーハンドリング
+   *
+   * @param ex ConstraintViolationException
+   * @return エラーメッセージと400 BAD REQUEST
+   */
+  @ExceptionHandler(ConstraintViolationException.class)
+  public ResponseEntity<String> handleConstraintViolationException(
+      ConstraintViolationException ex) {
+    StringBuilder errors = new StringBuilder();
+    for (ConstraintViolation<?> violation : ex.getConstraintViolations()) {
+      // エラーメッセージだけを取得し、整形する
+      errors.append(violation.getMessage()).append("\n");
+    }
+    return new ResponseEntity<>(errors.toString(), HttpStatus.BAD_REQUEST);
+  }
 }
 
 
 
-/*　model
-@GetMapping("/newStudent")
-public String newStudent(Model model) {
-  StudentDetail studentDetail = new StudentDetail();
-  // ★ ここでstudentオブジェクトを初期化する
-  studentDetail.setStudent(new Student());
-  studentDetail.setStudentsCourses(Arrays.asList(new StudentsCourses()));
-  // studentsCoursesリストを初期化し、1つ以上の空のオブジェクトを追加
-  // モデルにオブジェクトを追加
-  model.addAttribute("studentDetail", studentDetail);
-  return "registerStudent";
-}
-
- */

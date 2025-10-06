@@ -1,11 +1,14 @@
 package raisetech.StudentManagement.service;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -13,6 +16,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import raisetech.StudentManagement.controller.converter.StudentConverter;
 import raisetech.StudentManagement.data.Student;
 import raisetech.StudentManagement.data.StudentsCourses;
+import raisetech.StudentManagement.domain.StudentCourseStatusDetail;
 import raisetech.StudentManagement.domain.StudentDetail;
 import raisetech.StudentManagement.repository.StudentRepository;
 
@@ -22,15 +26,26 @@ class StudentServiceTest {
   @Mock
   private StudentRepository repository;
 
+  private StudentService sut;
+
   @Mock
   private StudentConverter converter;
+
+  @BeforeEach
+  void setUp() {
+    sut = new StudentService(repository, converter);
+  }
 
   @Test
   void searchStudent_リポジトリとコンバーターの処理が適切に呼び出せていること() {
     List<Student> studentList = new ArrayList<>();
     List<StudentsCourses> studentCourseList = new ArrayList<>();
+    List<StudentDetail> studentDetailList = new ArrayList<>();
+
     when(repository.searchStudent()).thenReturn(studentList);
     when(repository.searchStudentsCourse()).thenReturn(studentCourseList);
+    when(converter.convertStudentDetails(studentList, studentCourseList)).thenReturn(
+        studentDetailList);
 
     sut.searchStudentList();
 
@@ -107,4 +122,34 @@ class StudentServiceTest {
     verify(repository, times(1)).findCoursesById(studentId);
   }
 
+  @Test
+  @DisplayName("getCoursesWithStatusメソッドがリポジトリを正しく呼び出すこと")
+  void getCoursesWithStatus_callsRepository() {
+    List<StudentCourseStatusDetail> expectedList = new ArrayList<>();
+    when(repository.findCoursesWithStatus()).thenReturn(expectedList);
+
+    List<StudentCourseStatusDetail> actualList = sut.getCoursesWithStatus();
+
+    verify(repository, times(1)).findCoursesWithStatus();
+    assertEquals(expectedList, actualList);
+  }
+
+  @Test
+  @DisplayName("申込状況で受講生詳細を検索するとリポジトリが正しく呼び出されること")
+  void findStudentDetailsByApplicationStatus_callsRepository() {
+    // 修正: テスト対象のメソッドで使う引数を定義
+    String applicationStatus = "受講中";
+    // モックの振る舞いを設定（ServiceがRepositoryを呼び出したときの戻り値を設定）
+    List<StudentDetail> expectedList = new ArrayList<>();
+    when(repository.findStudentDetailsByApplicationStatus(applicationStatus)).thenReturn(
+        expectedList);
+
+    // 修正: Service（sut）のメソッドを呼び出す
+    List<StudentDetail> actualList = sut.findStudentDetailsByApplicationStatus(applicationStatus);
+
+    // 修正: ServiceがRepositoryを正しく呼び出したことを検証
+    verify(repository, times(1)).findStudentDetailsByApplicationStatus(applicationStatus);
+    // 戻り値が期待通りであることを検証
+    assertEquals(expectedList, actualList);
+  }
 }
