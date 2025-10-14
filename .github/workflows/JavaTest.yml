@@ -36,7 +36,7 @@ jobs:
 
       - name: Build and Package Jar (bootJar)
         run: ./gradlew bootJar
-
+        
       - name: Deploy Application to EC2 via SSH/SCP
         uses: appleboy/ssh-action@master
         with:
@@ -89,3 +89,6 @@ jobs:
             
             # 5. サービスの状態確認
                     sudo systemctl status StudentManagement
+
+ 
+
