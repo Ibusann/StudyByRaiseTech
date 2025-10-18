@@ -32,7 +32,7 @@ jobs:
 
       - name: Test with Gradle Wrapper
         run: ./gradlew test
-
+        
       - name: Build with Gradle Wrapper
         run: ./gradlew bootJar
 
