@@ -8,22 +8,100 @@ on:
 
 jobs:
   build:
+    env:
+      SRC_PATH: 'build/libs/StudentManagement-0.0.1-SNAPSHOT.jar' # GradleのbootJarが出力するjarファイル名に合わせる
+      EC2_USER: 'ec2-user' # EC2にSSH接続するユーザー名
+      EC2_HOST: '13.115.133.201' # EC2のパブリックIPまたはDNS名
+      DEST_PATH: '/home/ec2-user/StudentManagement.jar' # EC2上のファイルの配置先
 
     runs-on: ubuntu-latest
     permissions:
       contents: read
 
     steps:
-    - uses: actions/checkout@v4
-    - name: Set up JDK 21
-      uses: actions/setup-java@v4
-      with:
-        java-version: '21'
-        distribution: 'temurin'
+      - uses: actions/checkout@v4
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          # caches: gradle # Gradleキャッシュを有効にする場合は追加
 
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@af1da67850ed9a4cedd57bfd976089dd991e2582 # v4.0.0
 
-    - name: Setup Gradle
-      uses: gradle/actions/setup-gradle@af1da67850ed9a4cedd57bfd976089dd991e2582 # v4.0.0
+      - name: Test with Gradle Wrapper
+        run: ./gradlew test
+        
+      - name: Build with Gradle Wrapper
+        run: ./gradlew bootJar
 
-    - name: Build with Gradle Wrapper
-      run: ./gradlew clean test
+      - name: SCP Copy Application to EC2
+        env:
+          PRIVATE_KEY: ${{ secrets.AWS_EC2_PRIVATE_KEY }}
+          # SRC_PATH, EC2_USER, EC2_HOST, DEST_PATH はジョブレベルのenvで定義されています
+        run: |
+          # 秘密鍵をファイルに書き込み、パーミッションを600に設定
+          echo "$PRIVATE_KEY" > private_key
+          chmod 600 private_key
+          # SCPでアプリケーションをEC2にコピー
+          # 環境変数が確実に展開されるよう、${{ env.VAR }} 構文を使用しています。
+          scp -o StrictHostKeyChecking=no -i private_key ${{ env.SRC_PATH }} ${{ env.EC2_USER }}@${{ env.EC2_HOST }}:${{ env.DEST_PATH }}
+
+      - name: SSH Application Deploy
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ env.EC2_HOST }}
+          username: ${{ env.EC2_USER }}
+          key: ${{ secrets.AWS_EC2_PRIVATE_KEY }}
+          env: DEST_PATH
+          # 修正点: ヒアドキュメントの開始・終了タグのインデントを削除し、
+          # -a オプションを削除して、スクリプトの信頼性を高めました。
+          script: |
+            # yum updateは不要な場合もあるためコメントアウト可能
+            # sudo yum update -y 
+
+            SERVICE_FILE="/etc/systemd/system/StudentManagement.service"
+
+            if [ -f "$SERVICE_FILE" ]; then
+                echo "Service File already exists at $SERVICE_FILE"
+            else
+                # EOLタグと cat の間にスペースやインデントを入れないこと
+                cat <<EOL | sudo tee "$SERVICE_FILE" > /dev/null
+            [Unit]
+            Description = StudentManagement App
+
+            [Service]
+            ExecStart = java -jar ${DEST_PATH}
+            EnvironmentFile = /etc/sysconfig/StudentManagement
+            Restart = no
+            Type = simple
+            User = ec2-user
+            Group = ec2-user
+            SuccessExitStatus = 143
+
+            [Install]
+            WantedBy = multi-user.target
+            EOL
+            fi
+
+            sudo systemctl daemon-reload
+            if sudo systemctl status StudentManagement 2>&1 | grep "Active: active (running)" ; then
+            sudo systemctl restart StudentManagement
+            else
+            sudo systemctl start StudentManagement
+            fi
+            # サービス設定をリロード
+                    sudo systemctl daemon-reload
+            
+            # サービスの再起動または開始
+                    if sudo systemctl is-active --quiet StudentManagement; then
+                    echo "Restarting StudentManagement service."
+                    sudo systemctl restart StudentManagement
+                    else
+                    echo "Starting StudentManagement service."
+                    sudo systemctl start StudentManagement
+                    sudo systemctl enable StudentManagement # 初回起動時に自動起動設定
+                    fi
+            
+                    sudo systemctl status StudentManagement | head -n 3
