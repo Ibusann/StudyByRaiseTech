@@ -9,8 +9,7 @@ on:
 jobs:
   build:
     env:
-      SRC_PATH: 'build/libs/StudentManagement-0.0.1-SNAPSHOT.jar' # GradleのbootJarが出力するjarファイル名に合わせる
-      DEST_PATH: '/home/ec2-user/StudentManagement.jar' # EC2上のファイルの配置先
+      DEST_PATH: '/home/ec2-user/StudentManagement.jar'
 
     runs-on: ubuntu-latest
     permissions:
@@ -26,7 +25,6 @@ jobs:
           # caches: gradle
 
       - name: Setup Gradle
-        # 安定版タグにピン留め
         uses: gradle/actions/setup-gradle@af1da67850ed9a4cedd57bfd976089dd991e2582 # v4.0.0
 
       - name: Test with Gradle Wrapper
@@ -34,82 +32,40 @@ jobs:
 
       - name: Build with Gradle Wrapper
         run: ./gradlew bootJar
+      - name: Set dynamic JAR_PATH
+        id: set_jar_path
+        run: |
+          JAR_FILE=$(find build/libs -name "*.jar" -type f | head -n 1)
+          echo "SRC_PATH=$JAR_FILE" >> $GITHUB_ENV
+          echo "Generated JAR path: $JAR_FILE"
 
       - name: SCP Copy Application to EC2 (Secure)
         env:
           PRIVATE_KEY: ${{ secrets.AWS_EC2_PRIVATE_KEY }}
-          EC2_USER: ${{ secrets.EC2_USER }} # Secrets参照に変更
-          EC2_HOST: ${{ secrets.EC2_HOST }} # Secrets参照に変更
         run: |
-          echo "Starting SCP to ${{ env.EC2_HOST }}"
           # 秘密鍵をファイルに書き込み、パーミッションを600に設定
           echo "$PRIVATE_KEY" > private_key
           chmod 600 private_key
-
+          
           # SCPでアプリケーションをEC2にコピー
-          scp -o StrictHostKeyChecking=no -i private_key ${{ env.SRC_PATH }} ${{ env.EC2_USER }}@${{ env.EC2_HOST }}:${{ env.DEST_PATH }}
-
-          # ⚠️ 秘密鍵の後片付け (課題対応)
+          # ⚠️ SRC_PATHはジョブレベルのenvから、他はSecretsから参照
+          scp -o StrictHostKeyChecking=no -i private_key ${{ env.SRC_PATH }} $EC2_USER@$EC2_HOST:${{ env.DEST_PATH }}
+          
+          # 秘密鍵の後片付け (課題対応)
           rm private_key
 
       - name: SSH Application Deploy
-        # 安定版タグにピン留め (課題対応)
         uses: appleboy/ssh-action@v0.1.10
         with:
-          host: ${{ secrets.EC2_HOST }} # Secrets参照に変更
-          username: ${{ secrets.EC2_USER }} # Secrets参照に変更
+          # SSHアクションはwithブロックでSecretsを参照
+          host: ${{ env.EC2_HOST }}
+          username: ${{ env.EC2_USER }}
           key: ${{ secrets.AWS_EC2_PRIVATE_KEY }}
           env: DEST_PATH
           script: |
-            # ⚠️ エラー処理: コマンド失敗時にスクリプトを即座に終了 (課題対応)
-            set -e
-
-            SERVICE_FILE="/etc/systemd/system/StudentManagement.service"
-
-            # 1. サービスファイルが存在しない場合のみ作成
-            if [ ! -f "$SERVICE_FILE" ]; then
-                echo "Creating new systemd Service File at $SERVICE_FILE"
-                cat <<EOL | sudo tee "$SERVICE_FILE" > /dev/null
-            
-            [Unit]
-            Description = StudentManagement App
-
-            [Service]
-            ExecStart=/usr/bin/java -jar ${DEST_PATH}
-            EnvironmentFile=/etc/sysconfig/StudentManagement
-            Restart=on-failure
-            Type=simple
-            User=ec2-user
-            Group=ec2-user
-            SuccessExitStatus=143
-  
-            [Install]
-            WantedBy=multi-user.target
-            EOL
-            sudo systemctl enable StudentManagement # 初回作成時のみ自動起動設定
-            else
-            echo "Service File already exists at $SERVICE_FILE"
-            fi
-            
-            sudo systemctl daemon-reload
+            sudo yum update -y
             if sudo systemctl status StudentManagement 2>&1 | grep "Active: active (running)" ; then
             sudo systemctl restart StudentManagement
             else
             sudo systemctl start StudentManagement
             fi
-            # サービス設定をリロード
-                    sudo systemctl daemon-reload
-            
-            # サービスの再起動または開始
-            # --- サービスの起動ロジックここから --- #
-                    if sudo systemctl is-active --quiet StudentManagement; then
-                    echo "Restarting StudentManagement service."
-                    sudo systemctl restart StudentManagement
-                    else
-                    echo "Starting StudentManagement service."
-                    sudo systemctl start StudentManagement
-                    sudo systemctl enable StudentManagement # 初回起動時に自動起動設定
-                    fi
-            # --- サービスの起動ロジックここまで --- #
-            
-                    sudo systemctl status StudentManagement | head -n 3
