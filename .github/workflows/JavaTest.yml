@@ -95,6 +95,7 @@ jobs:
                     sudo systemctl daemon-reload
             
             # サービスの再起動または開始
+            # --- サービスの起動ロジックここから --- #
                     if sudo systemctl is-active --quiet StudentManagement; then
                     echo "Restarting StudentManagement service."
                     sudo systemctl restart StudentManagement
@@ -103,5 +104,6 @@ jobs:
                     sudo systemctl start StudentManagement
                     sudo systemctl enable StudentManagement # 初回起動時に自動起動設定
                     fi
+            # --- サービスの起動ロジックここまで --- #
             
                     sudo systemctl status StudentManagement | head -n 3
